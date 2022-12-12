@@ -1,0 +1,42 @@
+[
+  {
+    "timestamp": 123123,
+    "nombre": "lapiz",
+    "descripcion": "lapiz de grafito",
+    "código": 11,
+    "foto": "https://asdas.com",
+    "precio": 1000,
+    "stock": 20,
+    "id": 1
+  },
+  {
+    "timestamp": 123,
+    "nombre": "Goma",
+    "descripcion": "Goma de grafito",
+    "código": 113,
+    "foto": "https://asdas.com",
+    "precio": 2000,
+    "stock": 200,
+    "id": 2
+  },
+  {
+    "timestamp": 2312,
+    "nombre": "lapicera",
+    "descripcion": "lapicera VIC",
+    "código": 112,
+    "foto": "https://asdas.com",
+    "precio": 500,
+    "stock": 50,
+    "id": 3
+  },
+  {
+    "timestamp": "2022-11-21T17:56:56.300Z",
+    "nombre": "lapicera",
+    "descripcion": "lapicera VIC",
+    "código": 112,
+    "foto": "https://asdas.com",
+    "precio": 500,
+    "stock": 50,
+    "id": 4
+  }
+]
