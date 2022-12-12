@@ -3,8 +3,6 @@ import productController from '../../src/controllers/Products.js'
 const routerProducts = new Router()
 import soloAdmin from '../../helpers/admin.js'
 
-
-//como hago para hacer una o la otra en la misma ruta?
 routerProducts.get('/:id',async (req,res,next) => {
     const { id } = req.params
     const productos = await productController.getById(id)

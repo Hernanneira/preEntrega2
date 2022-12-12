@@ -13,9 +13,7 @@ const ProductosSchema = new Schema({
 })
 
 class Products {
-    constructor() {
-        const productosDAO = mongoose.model('productos', ProductosSchema);
-    }
+        productosDAO = mongoose.model('productos', ProductosSchema);
 
     async connect(){
         await mongoose.connect('mongodb://localhost:27017/productos', {
@@ -31,6 +29,7 @@ class Products {
 
     async getAll() {
         try {
+            this.connect()
             const content = await this.productosDAO.find({})
             this.disconnect()
             return content
