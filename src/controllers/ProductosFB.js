@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 import fs from 'fs';
-import productos from '../daos/productos/productos.json' assert { type: "json" };
+// import productos from '../daos/productos/productos.json' assert { type: "json" };
 
 const serviceAccount = JSON.parse(fs.readFileSync('./db/serviceAccountKey.json', 'utf8'));
 
@@ -17,71 +17,96 @@ class Products {
     
 async getAll() {
     try {
+        let elementosFiltrados = []
         const snapshot = await ecommerce.get();
-        snapshot.forEach(doc => {
-        console.log(doc.id, '=>', doc.data());
-    })
-        return snapshot //en la consola me lo trae pero en thunder medio raro el objeto.
+        snapshot.docs.forEach((doc) => {
+            const list = doc.data().productos
+            console.log(list)
+            for (const prop in list) {
+                let getAllProduct = (list[prop])
+                elementosFiltrados.push(getAllProduct)
+                console.log(elementosFiltrados)
+            }
+                // elementosFiltrados = list.filter(e => e)
+        })
+
+        return elementosFiltrados
     } catch (error) {
         return []
     }
 }
-// async getById(id){
-//     try {
-//         this.connect()
-//         const content =  await this.productosDAO.find({id: id}) // usando mongo
-//         const elementosFiltrados = content.filter(e => e.id === (parseInt(id))) //trabajandolo en paralelo
-//         this.disconnect()
-//         if(elementosFiltrados.length === 0){
-//             return({ error : 'producto no encontrado' })
-//         } else {
-//             return content
-//         }
-//     } catch (error) {
-//         return({error})
-//     }
-// }
+async getById(id){
+    try {
+        const snapshot = await ecommerce.get();
+        let elementosFiltrados = []
+        snapshot.docs.forEach((doc)=>{
+            const list = doc.data().productos
+            elementosFiltrados = list.filter(e => e.id === (parseInt(id)))
+        })
+        if(elementosFiltrados.length === 0){
+            return({ error : 'producto no encontrado' })
+        } else {
+            return elementosFiltrados
+        }
+    } catch (error) {
+        return({error})
+    }
+}
 
-// async save(timestamp, nombre, descripcion, código, foto, precio, stock) {
-//     try {
-//         this.connect()
-//         const content =  await this.productosDAO.find({})
-//         let newId;
-//         if(content.length == 0){
-//             newId = 1;
-//         }else {
-//             newId = content[content.length - 1].id + 1;
-//         }
-//         const newObj = {
-//             timestamp: new Date(),
-//             nombre: nombre,
-//             descripcion: descripcion,
-//             código: código,
-//             foto: foto,
-//             precio: precio,
-//             stock: stock,
-//             id: newId
-//         }
-//         const newProduct = await this.productosDAO.insertMany(newObj)
-//         this.disconnect()
-//         return newProduct
-//         }
-//     catch (error) {
-//         return(error)
-//     }
-// }
+async save(timestamp, nombre, descripcion, código, foto, precio, stock) {
+    try {
+        const content = await this.getAll()
+        let newId;
+        if (content.length == 0) {
+            newId = 1;
+        }else {
+            newId = content[content.length - 1].id + 1;
+        }
+        const indexContent  = content.length 
 
-// async update(timestamp, nombre, descripcion, código, foto, precio, stock, id) {
-//     try{
-//         this.connect()
-//         const newProduct = {timestamp, nombre, descripcion, código, foto, precio, stock, id};
-//         const updateProduct = await this.productosDAO.updateMany({id: id}, {$set: newProduct})
-//         this.disconnect()
-//         return updateProduct ; //me devuelve un objeto raro pero lo actualiza.
-//     } catch (error) {
-//         return(error)
-//     }
-// }
+        const newObj = {
+            timestamp: new Date(),
+            nombre: nombre,
+            descripcion: descripcion,
+            código: código,
+            foto: foto,
+            precio: precio,
+            stock: stock,
+            id: newId
+        }
+
+        const newProduct = {
+            ...content,
+            [indexContent]: newObj
+        }
+        console.log(newProduct)
+        const postNewProduct = await ecommerce.doc('TrpNtUYLzUCUwqUNIrY8').update({productos: newProduct});
+        console.log(postNewProduct)
+        return postNewProduct
+        }
+    catch (error) {
+        return(error)
+    }
+}
+
+async update(timestamp, nombre, descripcion, código, foto, precio, stock, id) {
+    try{
+        const content = await this.getAll()
+        const newProduct = {timestamp, nombre, descripcion, código, foto, precio, stock, id};
+        const elementosFiltrados = content.filter(e => e.id !== (parseInt(id)))
+        if(elementosFiltrados.length === content.length){
+            return({ error : 'producto no encontrado' })
+        } else {
+            elementosFiltrados.push(newProduct)
+        }
+        console.log(elementosFiltrados)
+        const updateProduct = await ecommerce.doc('TrpNtUYLzUCUwqUNIrY8').update({productos: elementosFiltrados});
+        return updateProduct;
+    } catch (error) {
+        return(error)
+    }
+}
+
 // async deleteAll(){
 //     try {
 //         this.connect()
@@ -94,16 +119,21 @@ async getAll() {
 //     }
 // }
 
-// async deleteById (id) {
-//     try {
-//         this.connect()
-//         const elementosFiltrados = await this.productosDAO.deleteMany({id: id})
-//         this.disconnect()
-//         return elementosFiltrados 
-//     } catch (error) {
-//         return(error)
-//     }
-// }
+async deleteById (id) {
+    try {
+        const content = await this.getAll()
+        const elementosFiltrados = content.filter(e => e.id !== (parseInt(id)))
+        console.log(elementosFiltrados)
+        if(elementosFiltrados.length === content.length){
+            return({ error : 'producto no encontrado' })
+        } else {
+            const updateProduct = await ecommerce.doc('TrpNtUYLzUCUwqUNIrY8').update({productos: elementosFiltrados});
+            return elementosFiltrados;
+        }
+    } catch (error) {
+        return({error})
+    }
+}
 }
 
 const productControllerFB = new Products()

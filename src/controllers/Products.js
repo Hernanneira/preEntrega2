@@ -12,6 +12,8 @@ const ProductosSchema = new Schema({
     id: { type: Number, default: false },
 })
 
+console.log("db mongoose conectada")
+
 class Products {
         productosDAO = mongoose.model('productos', ProductosSchema);
 
