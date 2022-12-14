@@ -37,90 +37,84 @@ class Products {
             return []
         }
     }
-    // async getById(id){
-    //     try {
-    //         const content =  JSON.parse(await fs.readFile(this.route,'utf-8'))
-    //         const elementosFiltrados = content.filter(e => e.id === (parseInt(id)))
-    //         if(elementosFiltrados.length === 0){
-    //             return({ error : 'producto no encontrado' })
-    //         } else {
-    //             return(elementosFiltrados)
-    //         }
-    //     } catch (error) {
-    //         return({error})
-    //     }
-    // }
+    async getById(id){
+        try {
+            this.connect()
+            const content =  await this.productosDAO.find({id: id}) // usando mongo
+            const elementosFiltrados = content.filter(e => e.id === (parseInt(id))) //trabajandolo en paralelo
+            this.disconnect()
+            if(elementosFiltrados.length === 0){
+                return({ error : 'producto no encontrado' })
+            } else {
+                return content
+            }
+        } catch (error) {
+            return({error})
+        }
+    }
 
-    // async save(timestamp, nombre, descripcion, código, foto, precio, stock) {
-    //     try {
-    //             const content = JSON.parse(await fs.readFile(this.route,'utf-8'))
-    //             let newId;
-    //             if(content.length == 0){
-    //                 newId = 1;
-    //             }else {
-    //                 newId = content[content.length - 1].id + 1;
-    //             }
-    //             const newObj = {
-    //                 timestamp: new Date(),
-    //                 nombre: nombre,
-    //                 descripcion: descripcion,
-    //                 código: código,
-    //                 foto: foto,
-    //                 precio: precio,
-    //                 stock: stock,
-    //                 id: newId
-    //             }
-    //             content.push(newObj);
-    //             await fs.writeFile(this.route,JSON.stringify(content, null, 2))
-    //             return(newObj)
-    //         }
-    //     catch (error) {
-    //         return(error)
-    //     }
-    // }
+    async save(timestamp, nombre, descripcion, código, foto, precio, stock) {
+        try {
+            this.connect()
+            const content =  await this.productosDAO.find({})
+            let newId;
+            if(content.length == 0){
+                newId = 1;
+            }else {
+                newId = content[content.length - 1].id + 1;
+            }
+            const newObj = {
+                timestamp: new Date(),
+                nombre: nombre,
+                descripcion: descripcion,
+                código: código,
+                foto: foto,
+                precio: precio,
+                stock: stock,
+                id: newId
+            }
+            const newProduct = await this.productosDAO.insertMany(newObj)
+            this.disconnect()
+            return newProduct
+            }
+        catch (error) {
+            return(error)
+        }
+    }
 
-    // async update(timestamp, nombre, descripcion, código, foto, precio, stock, id) {
-    //     try{
-    //         const content = await JSON.parse(await fs.readFile(this.route,'utf-8'))
-    //         let identificacion = Number(id)
-    //         let index = content.findIndex(prod => prod.id === identificacion)
-    //         const newProduct = {timestamp, nombre, descripcion, código, foto, precio, stock, "id": identificacion};
-    //         if(index === -1 ) {
-    //             return({ error : 'producto no encontrado' }
-    //             ) 
-    //         } else {
-    //             content[index] = newProduct
-    //             await fs.writeFile(this.route,JSON.stringify(content, null, 2))
-    //             return(content);
-    //         }
-    //     } catch (error) {
-    //         return(error)
-    //     }
-    // }
-    // async deleteAll(){
-    //     try {
-    //         await fs.writeFile(`./$productos.json`,JSON.stringify([], null, 2))
-    //         const content = JSON.parse(await fs.readFile(this.route,'utf-8'))
-    //         console.log(content)
-    //     } catch (error) {
-    //         console.log(error)
-    //         return "no pudo eliminarse"
-    //     }
-    // }
-    // async deleteById (id) {
-    //     try {
-    //         const content = await JSON.parse(await fs.readFile(this.route,'utf-8'))
-    //         const elementosFiltrados = content.filter(e => e.id !== parseInt(id))
-    //         if(elementosFiltrados.length === (content.length)){
-    //             return({ error : 'producto no encontrado' })
-    //         } else {
-    //             await fs.writeFile(this.route,JSON.stringify(elementosFiltrados, null, 2))
-    //             return(elementosFiltrados)
-    //         }
-    //     } catch (error) {
-    //         return(error)
-    //     }
-    // }
+    async update(timestamp, nombre, descripcion, código, foto, precio, stock, id) {
+        try{
+            this.connect()
+            const newProduct = {timestamp, nombre, descripcion, código, foto, precio, stock, id};
+            const updateProduct = await this.productosDAO.updateMany({id: id}, {$set: newProduct})
+            this.disconnect()
+            return updateProduct ; //me devuelve un objeto raro pero lo actualiza.
+        } catch (error) {
+            return(error)
+        }
+    }
+    async deleteAll(){
+        try {
+            this.connect()
+            await this.productosDAO.deleteAll({})
+            this.disconnect()
+            return "eliminado con exito"
+        } catch (error) {
+            console.log(error)
+            return "no pudo eliminarse"
+        }
+    }
+
+    async deleteById (id) {
+        try {
+            this.connect()
+            const elementosFiltrados = await this.productosDAO.deleteMany({id: id})
+            this.disconnect()
+            return elementosFiltrados 
+        } catch (error) {
+            return(error)
+        }
+    }
 }
 
 const productController = new Products()
