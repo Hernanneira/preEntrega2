@@ -40,10 +40,11 @@ class Products {
         }
     }
     async getById(id){
+        console.log(id)
         try {
             this.connect()
             const content =  await this.productosDAO.find({id: id}) // usando mongo
-            const elementosFiltrados = content.filter(e => e.id === (parseInt(id))) //trabajandolo en paralelo
+            const elementosFiltrados = content.filter(e => e.id === id) //trabajandolo en paralelo
             this.disconnect()
             if(elementosFiltrados.length === 0){
                 return({ error : 'producto no encontrado' })
@@ -51,6 +52,7 @@ class Products {
                 return content
             }
         } catch (error) {
+            console.log('estamos en error')
             return({error})
         }
     }
@@ -110,7 +112,7 @@ class Products {
     async deleteById (id) {
         try {
             this.connect()
-            const elementosFiltrados = await this.productosDAO.deleteMany({id: id})
+            const elementosFiltrados = await this.productosDAO.deleteMany({id: id}) //me devuelve un objeto raro pero lo elimina.
             this.disconnect()
             return elementosFiltrados 
         } catch (error) {
